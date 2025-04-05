@@ -16,6 +16,8 @@ pip install -r requirements.txt
 
 ## Experiments
 Run node classification experiments using our HRGR method, along with the baseline algorithms [SDRF](https://arxiv.org/pdf/2111.14522), [FoSR](https://arxiv.org/pdf/2210.11790), and [BORF](https://proceedings.mlr.press/v202/nguyen23c/nguyen23c.pdf) all implemented with our clustering strategy to support large-scale graphs.
+All run scripts are located in the `algorithms_run_scripts/` folder.
+
 ### HRGR (ours)
 ```bash
 python HRGR_node_classification.py --dataset <str> --model <str> --lr <float> --weight_decay <float> \
