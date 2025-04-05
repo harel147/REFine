@@ -1,4 +1,3 @@
-import sys
 import warnings
 warnings.filterwarnings('ignore')
 import argparse
@@ -6,7 +5,7 @@ import numpy as np
 import torch
 from tqdm import tqdm
 
-from utils.model import GCN, GATv2, APPNPNet, MixHop, H2GCN, GPRGNN
+from utils.model import create_model
 from utils.dataloader import load_data
 
 from utils.utils import set_seed
@@ -24,23 +23,6 @@ parser.add_argument('--dropout', type=float, default=0.0, help='Dropout')
 parser.add_argument('--hidden_dimension', type=int, default=32, help='Hidden Dimension size')
 parser.add_argument('--device', type=str, default='cuda', help='Device to use')
 
-
-def create_model(model, num_features, num_classes, hidden_dimension, dropout):
-    if model == 'GCN':
-        return GCN(in_channels=num_features, hidden_channels=hidden_dimension, out_channels=num_classes, dropout=dropout)
-    if model == 'GATv2':
-        return GATv2(in_channels=num_features, hidden_channels=hidden_dimension, out_channels=num_classes, dropout=dropout)
-    if model == 'APPNPNet':
-        return APPNPNet(in_channels=num_features, hidden_channels=hidden_dimension, out_channels=num_classes)
-    if model == 'MixHop':
-        return MixHop(in_channels=num_features, hidden_channels=hidden_dimension, out_channels=num_classes)
-    if model == 'H2GCN':
-        return H2GCN(in_channels=num_features, hidden_channels=hidden_dimension, out_channels=num_classes)
-    if model == 'GPRGNN':
-        return GPRGNN(in_channels=num_features, hidden_channels=hidden_dimension, out_channels=num_classes)
-    else:
-        print("Invalid Model")
-        sys.exit()
 
 
 def run_none_node_classification(data, model_type, num_features, num_classes, hidden_dimension, dropout, lr, weight_decay,

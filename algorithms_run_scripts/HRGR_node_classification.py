@@ -1,4 +1,3 @@
-import sys
 import warnings
 warnings.filterwarnings('ignore')
 import argparse
@@ -6,7 +5,7 @@ import numpy as np
 import torch
 from tqdm import tqdm
 
-from utils.model import GCN, GATv2, APPNPNet, MixHop, H2GCN, GPRGNN
+from utils.model import create_model
 from utils.dataloader import load_data
 
 from algorithms.hrgr.HRGR import HRGR_rewiring
@@ -33,25 +32,6 @@ parser.add_argument('--data_eps', type=float, default=0.1, help='data kernel eps
 parser.add_argument('--sample_rate', type=float, default=0.1, help='sample rate')
 parser.add_argument('--add_or_delete', type=str, default='add', choices=['add', 'delete'], help='add or delete')
 parser.add_argument('--cluster_size', type=int, default=None, help='cluster size, when set to None cluster size is chosen by graph size')
-
-
-
-def create_model(model, num_features, num_classes, hidden_dimension, dropout):
-    if model == 'GCN':
-        return GCN(in_channels=num_features, hidden_channels=hidden_dimension, out_channels=num_classes, dropout=dropout)
-    if model == 'GATv2':
-        return GATv2(in_channels=num_features, hidden_channels=hidden_dimension, out_channels=num_classes, dropout=dropout)
-    if model == 'APPNPNet':
-        return APPNPNet(in_channels=num_features, hidden_channels=hidden_dimension, out_channels=num_classes)
-    if model == 'MixHop':
-        return MixHop(in_channels=num_features, hidden_channels=hidden_dimension, out_channels=num_classes)
-    if model == 'H2GCN':
-        return H2GCN(in_channels=num_features, hidden_channels=hidden_dimension, out_channels=num_classes)
-    if model == 'GPRGNN':
-        return GPRGNN(in_channels=num_features, hidden_channels=hidden_dimension, out_channels=num_classes)
-    else:
-        print("Invalid Model")
-        sys.exit()
 
 
 def run_hrgr_node_classification(data, model_type, num_features, num_classes, hidden_dimension, dropout, lr, weight_decay,

@@ -64,7 +64,7 @@ def basic_random_splits(num_nodes, splits=100):
     return train_mask, val_mask, test_mask
 
 
-def load_data(datasetname, num_train_per_class=20, num_val=500):
+def load_data(datasetname):
     path = f"{home_folder()}/repos/data/{datasetname}"
     # datasets with official splits
     if datasetname in ['Cora', 'Citeseer', 'Pubmed', 'Roman-empire', 'Actor', 'Wiki', 'BlogCatalog',

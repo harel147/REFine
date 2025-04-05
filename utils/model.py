@@ -1,3 +1,4 @@
+import sys
 import numpy as np
 import torch
 import torch.nn as nn
@@ -6,6 +7,25 @@ from torch_sparse import SparseTensor, matmul
 import scipy.sparse
 from torch_geometric.nn.conv.gcn_conv import gcn_norm
 from torch_geometric.nn import MessagePassing, GCNConv, GATv2Conv, APPNP, MixHopConv
+
+
+def create_model(model, num_features, num_classes, hidden_dimension, dropout):
+    if model == 'GCN':
+        return GCN(in_channels=num_features, hidden_channels=hidden_dimension, out_channels=num_classes, dropout=dropout)
+    if model == 'GATv2':
+        return GATv2(in_channels=num_features, hidden_channels=hidden_dimension, out_channels=num_classes, dropout=dropout)
+    if model == 'APPNPNet':
+        return APPNPNet(in_channels=num_features, hidden_channels=hidden_dimension, out_channels=num_classes)
+    if model == 'MixHop':
+        return MixHop(in_channels=num_features, hidden_channels=hidden_dimension, out_channels=num_classes)
+    if model == 'H2GCN':
+        return H2GCN(in_channels=num_features, hidden_channels=hidden_dimension, out_channels=num_classes)
+    if model == 'GPRGNN':
+        return GPRGNN(in_channels=num_features, hidden_channels=hidden_dimension, out_channels=num_classes)
+    else:
+        print("Invalid Model")
+        sys.exit()
+
 
 class GCN(nn.Module):
     def __init__(self, in_channels, hidden_channels, out_channels, dropout=0.0):
