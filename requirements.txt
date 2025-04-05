@@ -1,0 +1,8 @@
+# pip install torch==2.2.2+cu118 -f https://download.pytorch.org/whl/cu118/torch_stable.html
+# pip install pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-2.2.2+cu118.html
+# pip install torch-geometric==2.5.2 -f https://data.pyg.org/whl/torch-2.2.2+cu118.html
+
+# also:
+matplotlib
+seaborn
+numba
