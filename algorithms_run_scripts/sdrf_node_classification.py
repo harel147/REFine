@@ -25,7 +25,7 @@ parser.add_argument('--dropout', type=float, default=0.0, help='Dropout')
 parser.add_argument('--hidden_dimension', type=int, default=32, help='Hidden Dimension size')
 parser.add_argument('--device', type=str, default='cuda', help='Device to use')
 
-parser.add_argument('--sdrf_max_iter_ratio', type=int, default=0.2, help='sdrf max number of iterations ratio')
+parser.add_argument('--sdrf_max_iter_ratio', type=float, default=0.2, help='sdrf max number of iterations ratio')
 parser.add_argument('--sdrf_tau', type=int, default=100, help='sdrf temperature')
 parser.add_argument('--sdrf_removal_bound', type=float, default=0.5, help='sdrf removal bound')
 parser.add_argument('--cluster_size', type=int, default=None, help='cluster size, when set to None cluster size is chosen by graph size')
