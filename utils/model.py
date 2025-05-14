@@ -3,10 +3,12 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch_sparse import SparseTensor, matmul
+from torch_sparse import SparseTensor, matmul, fill_diag
 import scipy.sparse
 from torch_geometric.nn.conv.gcn_conv import gcn_norm
 from torch_geometric.nn import MessagePassing, GCNConv, GATv2Conv, APPNP, MixHopConv
+from torch_geometric.utils import remove_self_loops, add_self_loops
+from torch.nn import Module, ModuleList, Linear, LayerNorm
 
 
 def create_model(model, num_features, num_classes, hidden_dimension, dropout):
@@ -22,6 +24,8 @@ def create_model(model, num_features, num_classes, hidden_dimension, dropout):
         return H2GCN(in_channels=num_features, hidden_channels=hidden_dimension, out_channels=num_classes)
     if model == 'GPRGNN':
         return GPRGNN(in_channels=num_features, hidden_channels=hidden_dimension, out_channels=num_classes)
+    if model == 'OrderedGNN':
+        return OrderedGNN(in_channels=num_features, hidden_channels=hidden_dimension, out_channels=num_classes)
     else:
         print("Invalid Model")
         sys.exit()
@@ -344,3 +348,121 @@ class GPRGNN(nn.Module):
 
         x = self.prop1(x, edge_index)
         return x
+
+# taken from https://github.com/LUMIA-Group/OrderedGNN
+class OrderedConv(MessagePassing):
+    def __init__(self, tm_net, tm_norm, hidden_channel, chunk_size):
+        super(OrderedConv, self).__init__('mean')
+        self.tm_net = tm_net
+        self.tm_norm = tm_norm
+        self.add_self_loops = False
+        self.tm = True
+        self.simple_gating = False
+        self.diff_or = True
+        self.hidden_channel = hidden_channel
+        self.chunk_size = chunk_size
+
+
+    def forward(self, x, edge_index, last_tm_signal):
+        if isinstance(edge_index, SparseTensor):
+            edge_index = fill_diag(edge_index, fill_value=0)
+            if self.add_self_loops == True:
+                edge_index = fill_diag(edge_index, fill_value=1)
+        else:
+            edge_index, _ = remove_self_loops(edge_index)
+            if self.add_self_loops == True:
+                edge_index, _ = add_self_loops(edge_index, num_nodes=x.size(0))
+
+        m = self.propagate(edge_index, x=x)
+        if self.tm == True:
+            if self.simple_gating == True:
+                tm_signal_raw = F.sigmoid(self.tm_net(torch.cat((x, m), dim=1)))
+            else:
+                tm_signal_raw = F.softmax(self.tm_net(torch.cat((x, m), dim=1)), dim=-1)
+                tm_signal_raw = torch.cumsum(tm_signal_raw, dim=-1)
+                if self.diff_or == True:
+                    tm_signal_raw = last_tm_signal+(1-last_tm_signal)*tm_signal_raw
+            tm_signal = tm_signal_raw.repeat_interleave(repeats=int(self.hidden_channel/self.chunk_size), dim=1)
+            out = x*tm_signal + m*(1-tm_signal)
+        else:
+            out = m
+            tm_signal_raw = last_tm_signal
+
+        out = self.tm_norm(out)
+
+        return out, tm_signal_raw
+
+
+# taken from https://github.com/LUMIA-Group/OrderedGNN
+class OrderedGNN(Module):
+    def __init__(self, in_channels, hidden_channels, out_channels, dropout=0.0):
+        super().__init__()
+        self.dropout = dropout
+        self.linear_trans_in = ModuleList()
+        self.linear_trans_out = Linear(hidden_channels, out_channels)
+        self.norm_input = ModuleList()
+        self.convs = ModuleList()
+
+        self.tm_norm = ModuleList()
+        self.tm_net = ModuleList()
+
+        self.linear_trans_in.append(Linear(in_channels, hidden_channels))
+
+        self.norm_input.append(LayerNorm(hidden_channels))
+
+        num_layers_input = 1
+        global_gating = False
+        self.chunk_size = int(hidden_channels / 4)
+        num_layers = 2
+
+        for i in range(num_layers_input - 1):
+            self.linear_trans_in.append(Linear(hidden_channels, hidden_channels))
+            self.norm_input.append(LayerNorm(hidden_channels))
+
+        if global_gating == True:
+            tm_net = Linear(2 * hidden_channels, self.chunk_size)
+
+        for i in range(num_layers):
+            self.tm_norm.append(LayerNorm(hidden_channels))
+
+            if global_gating == False:
+                self.tm_net.append(Linear(2 * hidden_channels, self.chunk_size))
+            else:
+                self.tm_net.append(tm_net)
+
+            self.convs.append(OrderedConv(tm_net=self.tm_net[i], tm_norm=self.tm_norm[i], hidden_channel=hidden_channels, chunk_size=self.chunk_size))
+
+    def reset_parameters(self):
+        for lin in self.linear_trans_in:
+            lin.reset_parameters()
+        for n in self.norm_input:
+            n.reset_parameters()
+        for conv in self.convs:
+            conv.reset_parameters()
+        for n in self.tm_norm:
+            n.reset_parameters()
+        for n in self.tm_net:
+            n.reset_parameters()
+        self.linear_trans_out.reset_parameters()
+
+    def forward(self, x, edge_index, edge_weight=None):
+        check_signal = []
+
+        for i in range(len(self.linear_trans_in)):
+            x = F.dropout(x, p=self.dropout, training=self.training)
+            x = F.relu(self.linear_trans_in[i](x))
+            x = self.norm_input[i](x)
+
+        tm_signal = x.new_zeros(self.chunk_size)
+
+        for j in range(len(self.convs)):
+            x = F.dropout(x, p=self.dropout, training=self.training)
+            x, tm_signal = self.convs[j](x, edge_index, last_tm_signal=tm_signal)
+            check_signal.append(dict(zip(['tm_signal'], [tm_signal])))
+
+        x = F.dropout(x, p=self.dropout, training=self.training)
+        x = self.linear_trans_out(x)
+
+        # encode_values = dict(zip(['x', 'check_signal'], [x, check_signal]))
+
+        return x  # no need for softmax, CrossEntropyLoss already do softmax

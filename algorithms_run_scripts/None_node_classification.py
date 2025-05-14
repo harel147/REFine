@@ -16,7 +16,7 @@ set_seed(seed)
 
 parser = argparse.ArgumentParser(description='Run NodeClassification+Rewiring script')
 parser.add_argument('--dataset', type=str, help='Dataset')
-parser.add_argument('--model', type=str, default='GCN', choices=['GCN', 'GATv2', 'APPNPNet', 'MixHop', 'H2GCN', 'GPRGNN'], help='Model to use')
+parser.add_argument('--model', type=str, default='GCN', choices=['GCN', 'GATv2', 'APPNPNet', 'MixHop', 'H2GCN', 'GPRGNN', 'OrderedGNN'], help='Model to use')
 parser.add_argument('--lr', type=float, default=0.01, help='Learning Rate')
 parser.add_argument('--weight_decay', type=float, default=5e-4, help='weight_decay')
 parser.add_argument('--dropout', type=float, default=0.0, help='Dropout')
