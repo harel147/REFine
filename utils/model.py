@@ -30,7 +30,6 @@ def create_model(model, num_features, num_classes, hidden_dimension, dropout):
         print("Invalid Model")
         sys.exit()
 
-#
 class GCN(nn.Module):
     def __init__(self, in_channels, hidden_channels, out_channels, dropout=0.0):
         super().__init__()
