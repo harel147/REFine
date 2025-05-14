@@ -8,7 +8,7 @@ from tqdm import tqdm
 from utils.model import create_model
 from utils.dataloader import load_data
 
-from algorithms.hrgr.HRGR import HRGR_rewiring
+from algorithms.refine.REFine import REFine_rewiring
 
 
 
@@ -34,7 +34,7 @@ parser.add_argument('--add_or_delete', type=str, default='add', choices=['add', 
 parser.add_argument('--cluster_size', type=int, default=None, help='cluster size, when set to None cluster size is chosen by graph size')
 
 
-def run_hrgr_node_classification(data, model_type, num_features, num_classes, hidden_dimension, dropout, lr, weight_decay,
+def run_REFine_node_classification(data, model_type, num_features, num_classes, hidden_dimension, dropout, lr, weight_decay,
                        device, data_eps, scheme, sample_rate, add_or_delete, cluster_size, init_seeds=1):
 
     num_splits = data.train_mask.shape[1]
@@ -87,7 +87,7 @@ def run_hrgr_node_classification(data, model_type, num_features, num_classes, hi
             criterion = torch.nn.CrossEntropyLoss()
             model.reset_parameters()
 
-            new_data, new_edge_weight = HRGR_rewiring(data, cluster_size, split_idx, data_eps, sample_rate, add_or_delete, scheme=scheme)
+            new_data, new_edge_weight = REFine_rewiring(data, cluster_size, split_idx, data_eps, sample_rate, add_or_delete, scheme=scheme)
             num_add_or_delete = abs(data.edge_index.shape[1] - new_data.edge_index.shape[1])
             print(f"num_add_or_delete: {num_add_or_delete}, original graph has {data.edge_index.shape[1]} edges")
 
@@ -148,7 +148,7 @@ def main():
 
     print("Start Training...")
 
-    run_hrgr_node_classification(data, args.model, num_features, num_classes, args.hidden_dimension, args.dropout, args.lr,
+    run_REFine_node_classification(data, args.model, num_features, num_classes, args.hidden_dimension, args.dropout, args.lr,
                        args.weight_decay, args.device, args.data_eps, args.scheme, args.sample_rate, args.add_or_delete,
                        args.cluster_size)
 

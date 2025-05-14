@@ -68,7 +68,7 @@ def kernel_to_edge_index_and_edge_weight(kernel):
 
     return edge_index, edge_weight
 
-def reconstruct_full_graph_for_hrgr(cluster_data, split_idx, PDPs, part, data, sample_rate, add_or_delete):
+def reconstruct_full_graph_for_REFine(cluster_data, split_idx, PDPs, part, data, sample_rate, add_or_delete):
     all_edge_index = []
     node_offset = 0
     for pdp, cluster in zip(PDPs, cluster_data):
@@ -168,7 +168,7 @@ def reconstruct_full_graph_for_hrgr(cluster_data, split_idx, PDPs, part, data, s
 
     return merged_data, edge_weight
 
-def hrgr_clusters(data, cluster_size, split_idx, eps, sample_rate, add_or_delete, scheme='PDP', thresh_factor=1):
+def REFine_clusters(data, cluster_size, split_idx, eps, sample_rate, add_or_delete, scheme='PDP', thresh_factor=1):
     if is_undirected(data.edge_index) is False:  # METIS sometimes crush if the graph is directed
         data.edge_index = to_undirected(data.edge_index)
     num_parts = math.ceil(len(data.x)/cluster_size)
@@ -221,11 +221,11 @@ def hrgr_clusters(data, cluster_size, split_idx, eps, sample_rate, add_or_delete
 
         PDPs.append(pdp_without_padding)
 
-    merged_data, new_edge_weight = reconstruct_full_graph_for_hrgr(cluster_data, split_idx, PDPs, part, data, sample_rate, add_or_delete)
+    merged_data, new_edge_weight = reconstruct_full_graph_for_REFine(cluster_data, split_idx, PDPs, part, data, sample_rate, add_or_delete)
 
     return merged_data, new_edge_weight
 
-def hrgr_no_clusters(data, split_idx, eps, sample_rate, add_or_delete, scheme='PDP', thresh_factor=1):
+def REFine_no_clusters(data, split_idx, eps, sample_rate, add_or_delete, scheme='PDP', thresh_factor=1):
     data_kernel = compute_kernel_data(data.x.detach().cpu().numpy(), eps=eps)
     data_kernel = torch.from_numpy(data_kernel.astype(np.float32)).to(device)
     labels_kernel = (data.y.unsqueeze(0) == data.y.unsqueeze(1)).float()  # create P using all labels, will be masked accordingly for each data split
@@ -297,14 +297,14 @@ def hrgr_no_clusters(data, split_idx, eps, sample_rate, add_or_delete, scheme='P
 
     return new_data, edge_weight
 
-def HRGR_rewiring(data, cluster_size, split_idx, data_eps, sample_rate, add_or_delete, scheme):
+def REFine_rewiring(data, cluster_size, split_idx, data_eps, sample_rate, add_or_delete, scheme):
     if cluster_size is None:  # no clustering
-        new_data, new_edge_weight = hrgr_no_clusters(data, split_idx, data_eps,
+        new_data, new_edge_weight = REFine_no_clusters(data, split_idx, data_eps,
                                                   sample_rate, add_or_delete, scheme=scheme)
         new_edge_weight = None  # we don't use edge_weight
 
     else:
-        new_data, new_edge_weight = hrgr_clusters(data, cluster_size, split_idx, data_eps,
+        new_data, new_edge_weight = REFine_clusters(data, cluster_size, split_idx, data_eps,
                                                                             sample_rate, add_or_delete, scheme=scheme)
         new_edge_weight = None  # we don't use edge_weight
 

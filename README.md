@@ -1,4 +1,4 @@
-# HRGR
+# REFine
 
 Code for the paper: "It Takes a Graph to Know a Graph: Rewiring for Homophily with a Reference Graph".
 More details can be found in our paper [TODO](https://arxiv.org/******)
@@ -15,12 +15,12 @@ pip install -r requirements.txt
 ```
 
 ## Experiments
-Run node classification experiments using our HRGR method, along with the baseline algorithms [SDRF](https://arxiv.org/pdf/2111.14522), [FoSR](https://arxiv.org/pdf/2210.11790), and [BORF](https://proceedings.mlr.press/v202/nguyen23c/nguyen23c.pdf) all implemented with our clustering strategy to support large-scale graphs.
+Run node classification experiments using our REFine method, along with the baseline algorithms [SDRF](https://arxiv.org/pdf/2111.14522), [FoSR](https://arxiv.org/pdf/2210.11790), and [BORF](https://proceedings.mlr.press/v202/nguyen23c/nguyen23c.pdf) all implemented with our clustering strategy to support large-scale graphs.
 All run scripts are located in the `algorithms_run_scripts/` folder.
 
-### HRGR (ours)
+### REFine (ours)
 ```bash
-python HRGR_node_classification.py --dataset <str> --model <str> --lr <float> --weight_decay <float> \
+python REFine_node_classification.py --dataset <str> --model <str> --lr <float> --weight_decay <float> \
                                    --scheme <'D', 'PDP'> --data_eps <float> --sample_rate <float> \
                                    --add_or_delete <'add', 'delete'> --cluster_size <int> 
 ```
