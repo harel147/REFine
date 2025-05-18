@@ -3,7 +3,7 @@
 Code for the paper: "It Takes a Graph to Know a Graph: Rewiring for Homophily with a Reference Graph".
 More details can be found in our paper [TODO](https://arxiv.org/******)
 
-*first author (TODO)*, *second author (TODO)*
+*Harel Mendelman*, *Haggai Maron*, *Ronen Talmon*
 
 We also provide implementations of [SDRF](https://arxiv.org/pdf/2111.14522), [FoSR](https://arxiv.org/pdf/2210.11790), and [BORF](https://proceedings.mlr.press/v202/nguyen23c/nguyen23c.pdf) with our clustering approach, enabling these rewiring algorithms to scale to large graphs.
 
