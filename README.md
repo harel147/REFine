@@ -1,7 +1,7 @@
 # REFine
 
 Code for the paper: "It Takes a Graph to Know a Graph: Rewiring for Homophily with a Reference Graph".
-More details can be found in our paper [TODO](https://arxiv.org/******)
+More details can be found in our [paper](https://arxiv.org/pdf/2505.12411).
 
 *Harel Mendelman*, *Haggai Maron*, *Ronen Talmon*
 
