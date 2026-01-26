@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 import numpy as np
 import torch
 from torch_geometric.data import Data
@@ -13,6 +14,19 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 seed = 42
 set_seed(seed)
 
+def _project_root() -> Path:
+    """
+    Find repo root by walking up until we see the 'splits' directory.
+    This is robust to running from different working directories.
+    """
+    here = Path(__file__).resolve()
+    for p in [here] + list(here.parents):
+        if (p / "splits").is_dir():
+            return p
+    raise FileNotFoundError(
+        "Could not locate project root (expected a 'splits/' folder in some parent directory). "
+        "Make sure this file is inside the repo."
+    )
 
 def index_to_mask(index, size):
     mask = torch.zeros(size, dtype=torch.bool, device=index.device)
@@ -25,9 +39,11 @@ def fixed_geom_gcn_data_splits(dataset_name, num_nodes):
     val_mask = torch.zeros((num_nodes, fixed_splits), dtype=torch.bool)
     test_mask = torch.zeros((num_nodes, fixed_splits), dtype=torch.bool)
 
+    root = _project_root()
+    base = root / "splits" / "fixed_geom-gcn_splits"
+
     for idx in range(fixed_splits):
-        path = f"{home_folder()}/repos/label-diffusion-rewiring"
-        splits_file_path = f"{path}/splits/fixed_geom-gcn_splits/{dataset_name}_split_0.6_0.2_{str(idx)}.npz"
+        splits_file_path = base / f"{dataset_name}_split_0.6_0.2_{idx}.npz"
         with np.load(splits_file_path) as splits_file:
             train_mask_split = splits_file["train_mask"]
             val_mask_split = splits_file["val_mask"]
