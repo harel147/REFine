@@ -27,7 +27,7 @@ parser.add_argument('--dropout', type=float, default=0.0, help='Dropout')
 parser.add_argument('--hidden_dimension', type=int, default=32, help='Hidden Dimension size')
 parser.add_argument('--device', type=str, default='cuda', help='Device to use')
 
-parser.add_argument('--scheme', type=str, default='DPD', choices=['D', 'PDP'], help='propagation scheme')
+parser.add_argument('--scheme', type=str, default='PDP', choices=['D', 'PDP'], help='propagation scheme')
 parser.add_argument('--data_eps', type=float, default=0.1, help='data kernel eps')
 parser.add_argument('--sample_rate', type=float, default=0.1, help='sample rate')
 parser.add_argument('--add_or_delete', type=str, default='add', choices=['add', 'delete'], help='add or delete')
