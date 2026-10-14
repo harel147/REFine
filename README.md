@@ -8,13 +8,6 @@ Transactions on Machine Learning Research (TMLR), 2026.
 
 [Paper (OpenReview)](https://openreview.net/forum?id=M0C1hvJo6m)
 
-This repository originally accompanied an earlier version of this work:
-
-**It Takes a Graph to Know a Graph: Rewiring for Homophily with a Reference Graph**  
-[arXiv:2505.12411](https://arxiv.org/abs/2505.12411)
-
-The REFine algorithm is shared between the earlier preprint and the final TMLR work; the TMLR version substantially revises and extends the theoretical analysis and framing.
-
 We also provide implementations of [SDRF](https://arxiv.org/pdf/2111.14522), [FoSR](https://arxiv.org/pdf/2210.11790), and [BORF](https://proceedings.mlr.press/v202/nguyen23c/nguyen23c.pdf) with our clustering approach, enabling these rewiring algorithms to scale to large graphs.
 
 ## Installing
